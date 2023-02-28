@@ -9,18 +9,29 @@ import sys
 
 session = requests.session()
 ico = {}
+root_path = ""
+
+
+def exe_path():
+    if getattr(sys, 'frozen', False):
+        path = os.path.dirname(sys.executable)
+    elif __file__:
+        path = os.path.dirname(__file__)
+    global root_path
+    root_path = path
 
 
 def get_cookie():
-    is_exists = os.path.exists("./cookie")
+    cookie_path = os.path.join(root_path, "cookie")
+    is_exists = os.path.exists(cookie_path)
     if is_exists:
-        with open("./cookie", "r", encoding="utf-8") as f:
+        with open(cookie_path, "r", encoding="utf-8") as f:
             _cookie_ = f.read()
             if _cookie_:
                 return _cookie_
     else:
         _cookie_ = input("请输入在浏览器获取的cookie:")
-        with open("./cookie", 'x', encoding="utf-8") as fs:
+        with open(cookie_path, 'x', encoding="utf-8") as fs:
             fs.write(_cookie_)
             print("cookie 保存成功！")
             return _cookie_
@@ -53,10 +64,10 @@ def getVideData(bv, cookie):
 
 
 def downVideo(_video):
-    _dir = os.getcwd() + "\\downloads"
-    folder = os.path.exists(_dir)
+    download_path = os.path.join(root_path, "downloads")
+    folder = os.path.exists(download_path)
     if not folder:
-        os.makedirs(_dir)
+        os.makedirs(download_path)
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.55",
         "referer": "https://www.bilibili.com"
@@ -67,8 +78,8 @@ def downVideo(_video):
 
     total_size = int(int(response.headers["Content-Length"]) / 1024 + 0.5)
 
-    with open(_dir + "\\" + file_name + ".mp4", "wb") as f:
-        print('视频信息：【{}】 文件大小：【{}MB】'.format(
+    with open(download_path + "\\" + file_name + ".mp4", "wb") as f:
+        print('Video info：【{}】 文件大小：【{}MB】'.format(
             file_name, round(total_size / 1024, 1)))
         for chunk in tqdm(response.iter_content(chunk_size=1024), total=total_size, unit='k', desc="Downloading"):
             if chunk:
