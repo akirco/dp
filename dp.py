@@ -9,7 +9,6 @@ import sys
 
 session = requests.session()
 ico = {}
-root_path = ""
 
 
 def exe_path():
@@ -17,12 +16,11 @@ def exe_path():
         path = os.path.dirname(sys.executable)
     elif __file__:
         path = os.path.dirname(__file__)
-    global root_path
-    root_path = path
+    return path
 
 
 def get_cookie():
-    cookie_path = os.path.join(root_path, "cookie")
+    cookie_path = os.path.join(exe_path(), "cookie")
     is_exists = os.path.exists(cookie_path)
     if is_exists:
         with open(cookie_path, "r", encoding="utf-8") as f:
@@ -64,7 +62,7 @@ def getVideData(bv, cookie):
 
 
 def downVideo(_video):
-    download_path = os.path.join(root_path, "downloads")
+    download_path = os.path.join(exe_path(), "downloads")
     folder = os.path.exists(download_path)
     if not folder:
         os.makedirs(download_path)
@@ -88,9 +86,13 @@ def downVideo(_video):
 
 if __name__ == '__main__':
     try:
-        _bv = sys.argv[1].split("video")[1].replace("/", "").split("?")[0]
-        _cookie = get_cookie()
-        video = getVideData(_bv, _cookie)
-        downVideo(video)
+        if len(sys.argv) != 1:
+            _bv = sys.argv[1].split("video")[1].replace("/", "").split("?")[0]
+            _cookie = get_cookie()
+            video = getVideData(_bv, _cookie)
+            downVideo(video)
+        else:
+            print("""usage: dp  URL...\nif download file isn't 1080P,you must to delete `cookie` file at rootDir.""")
+
     except KeyboardInterrupt as e:
         exit()
